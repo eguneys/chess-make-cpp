@@ -11,4 +11,7 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 
 add_executable(my_project
-   src/main.cpp)
+   src/main.cpp
+   src/bitboard.cpp)
+
+target_compile_options(my_project PRIVATE /arch:AVX2)

@@ -1,10 +1,10 @@
-#ifndef Bitboard_h_Included
-#define Bitboard_h_Included
+#pragma once
 
-
+#include <intrin.h>
 #include <immintrin.h>
 #define pext(b, m) _pext_u64(b, m)
 
+#include <cassert>
 #include <algorithm>
 #include <cmath>
 
@@ -13,6 +13,14 @@
 
 
 namespace Chess {
+
+
+    namespace Bitboards {
+
+        void init();
+
+        std::string pretty(Bitboard b);
+    }
 
     constexpr Bitboard Bb_File_A = 0x0101010101010101ULL;
     constexpr Bitboard Bb_File_B = Bb_File_A << 1;
@@ -43,7 +51,9 @@ namespace Chess {
         Bitboard attacks_bb(Bitboard occupied) const { return attacks[index(occupied)]; }
     };
 
-    const Bitboard square_bb(Square s) {
+    extern Magic Magics[Square_NB][2];
+
+    inline const Bitboard square_bb(Square s) {
         return (1ULL << s);
     }
 
@@ -71,13 +81,12 @@ namespace Chess {
     constexpr Bitboard file_bb(Square s) { return file_bb(file_of(s)); }
 
 
-    u8 SquareDistance[64][64];
+    extern u8 SquareDistance[Square_NB][Square_NB];
 
-    Bitboard BetweenBB[64][64];
-    Bitboard LineBB[64][64];
-    Bitboard Attacks[64][64];
-    Bitboard PawnAttacks[2][64];
-
+    extern Bitboard BetweenBB[Square_NB][Square_NB];
+    extern Bitboard LineBB[Square_NB][Square_NB];
+    extern Bitboard PseudoAttacks[Piece_Type_NB][Square_NB];
+    extern Bitboard PawnAttacks[Color_NB][Square_NB];
 
     template <Direction D>
     constexpr Bitboard shift(Bitboard b)
@@ -86,12 +95,12 @@ namespace Chess {
                : D == Down        ? b >> 8
                : D == Up + Up     ? b << 16
                : D == Down + Down ? b >> 16
-               : D == Right       ? (b & ~FileHBB) << 1
-               : D == Left        ? (b & ~FileABB) >> 1
-               : D == UpRight     ? (b & ~FileHBB) << 9
-               : D == UpLeft      ? (b & ~FileABB) << 7
-               : D == DownRight   ? (b & ~FileHBB) >> 7
-               : D == DownLeft    ? (b & ~FileABB) >> 9
+               : D == Right       ? (b & ~Bb_File_H) << 1
+               : D == Left        ? (b & ~Bb_File_A) >> 1
+               : D == UpRight     ? (b & ~Bb_File_H) << 9
+               : D == UpLeft      ? (b & ~Bb_File_A) << 7
+               : D == DownRight   ? (b & ~Bb_File_H) >> 7
+               : D == DownLeft    ? (b & ~Bb_File_A) >> 9
                                   : 0;
     }
 
@@ -141,7 +150,7 @@ namespace Chess {
 
     template<PieceType T>
     inline Bitboard attacks_bb(Square s) {
-        return Attacks[T][s];
+        return PseudoAttacks[T][s];
     }
 
     template <PieceType T>
@@ -153,22 +162,41 @@ namespace Chess {
             case Queen:
             return attacks_bb<Bishop>(s, occupied) | attacks_bb<Rook>(s, occupied);
             default:
-            return Attacks[T][s];
+            return PseudoAttacks[T][s];
         }
     }
 
+    inline Bitboard attacks_bb(PieceType pt, Square s, Bitboard occupied)
+    {
+        assert((pt != Pawn) & (is_ok(s)));
+
+        switch (pt)
+        {
+        case Bishop:
+            return attacks_bb<Bishop>(s, occupied);
+        case Rook:
+            return attacks_bb<Rook>(s, occupied);
+        case Queen:
+            return attacks_bb<Bishop>(s, occupied) | attacks_bb<Rook>(s, occupied);
+        default:
+            return PseudoAttacks[pt][s];
+        }
+    }
 
     inline int popcount(Bitboard b) {
-        //return int(_mm_popcnt_u64(b));
-        return __builtin_popcountll(b);
+        return int(_mm_popcnt_u64(b));
     }
 
     inline Square lsb(Bitboard b) {
-        return Square(__builtin_ctzll(b));
+        unsigned long idx;
+        _BitScanForward64(&idx, b);
+        return Square(idx);
     }
 
     inline Square msb(Bitboard b) {
-        return Square(63 ^ __builtin_clzll(b));
+        unsigned long idx;
+        _BitScanReverse64(&idx, b);
+        return Square(idx);
     }
 
 
@@ -179,5 +207,3 @@ namespace Chess {
     }
 
 }
-
-#endif

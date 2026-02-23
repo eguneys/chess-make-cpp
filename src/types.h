@@ -1,5 +1,4 @@
-#ifndef Types_h_Included
-#define Types_h_Included
+#pragma once
 
 #include <cstdint>
 
@@ -15,17 +14,19 @@ namespace Chess {
 
     enum Color {
         White,
-        Black
+        Black,
+        Color_NB = 2
     };
 
     enum PieceType {
-        No_Piece,
+        No_Piece_Type,
         Pawn,
         Knight,
         Bishop,
         Rook,
         Queen,
-        King
+        King,
+        Piece_Type_NB = 8,
     };
 
     enum Piece {
@@ -41,7 +42,8 @@ namespace Chess {
         Black_Bishop,
         Black_Rook,
         Black_Queen,
-        Black_King
+        Black_King,
+        Piece_NB = 16,
     };
 
     enum Square: int {
@@ -52,11 +54,14 @@ namespace Chess {
         A5, B5, C5, D5, E5, F5, G5, H5,
         A6, B6, C6, D6, E6, F6, G6, H6,
         A7, B7, C7, D7, E7, F7, G7, H7,
-        A8, B8, C8, D8, E8, F8, G8, H8
+        A8, B8, C8, D8, E8, F8, G8, H8,
+        Sq_None,
+        Square_Zero = 0,
+        Square_NB = 64
     };
 
 
-    enum Direction {
+    enum Direction: int {
         Up = 8,
         Right = 1,
         Down = -8,
@@ -69,11 +74,11 @@ namespace Chess {
     };
 
     enum File {
-        File_A, File_B, File_C, File_D, File_E, File_F, File_G, File_H
+        File_A, File_B, File_C, File_D, File_E, File_F, File_G, File_H, File_Nb
     };
 
     enum Rank {
-        Rank_1, Rank_2, Rank_3, Rank_4, Rank_5, Rank_6, Rank_7, Rank_8
+        Rank_1, Rank_2, Rank_3, Rank_4, Rank_5, Rank_6, Rank_7, Rank_8, Rank_Nb
     };
 
 #define ENABLE_INC_OPERATORS_ON(T)                           \
@@ -86,6 +91,11 @@ namespace Chess {
     ENABLE_INC_OPERATORS_ON(Rank)
 
 #undef ENABLE_INC_OPERATORS_ON
+
+    constexpr Square operator+(Square s, Direction d) { return Square(int(s) + int(d)); }
+    constexpr Square operator-(Square s, Direction d) { return Square(int(s) - int(d)); }
+    inline Square& operator+=(Square&s, Direction d) { return s = s + d; }
+    inline Square& operator-=(Square&s, Direction d) { return s = s - d; }
 
     constexpr Color operator~(Color c) { return Color(c ^ 1); }
 
@@ -102,12 +112,10 @@ namespace Chess {
 
     constexpr bool is_ok(Square s) { return s >= A1 && s <= H8; }
 
-    constexpr File file_of(Square s) { return File(s & 7); }
+    constexpr File file_of(Square s) { return File(int(s) & 7); }
     constexpr Rank rank_of(Square s) { return Rank(s >> 3); }
 
     constexpr Direction pawn_push(Color c) { return c == White ? Up : Down; }
 
     
 }
-
-#endif
