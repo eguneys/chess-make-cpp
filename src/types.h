@@ -26,6 +26,7 @@ namespace Chess {
         Rook,
         Queen,
         King,
+        All_Pieces = 0,
         Piece_Type_NB = 8,
     };
 
@@ -108,7 +109,6 @@ namespace Chess {
     inline Color color_of(Piece pc) {
         return Color(pc >> 3);
     }
-
 
     constexpr bool is_ok(Square s) { return s >= A1 && s <= H8; }
 

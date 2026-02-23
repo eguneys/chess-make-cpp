@@ -1,18 +1,21 @@
 #include <iostream>
 #include "bitboard.h"
+#include "position.h"
 
 int main() {
     std::cout << "Hello" << std::endl;
 
     Chess::Bitboards::init();
 
-    std::cout << Chess::Bitboards::pretty(Chess::square_bb(Chess::H8));
+
+    Chess::Position p;
     
-    Chess::Bitboard occ = Chess::attacks_bb(Chess::Bishop, Chess::D1, 0);
+    p.set("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    //Chess::Piece pp = p.piece_on(Chess::E8);
 
-    occ = Chess::attacks_bb<Chess::Queen>(Chess::D4, Chess::square_bb(Chess::D5));
+    //std::cout << pp;
 
-    std::cout << Chess::Bitboards::pretty(occ);
+    std::cout << Chess::Bitboards::pretty(p.pieces(Chess::Bishop));
 
     return 0;
 }
