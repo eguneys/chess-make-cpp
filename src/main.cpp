@@ -16,8 +16,8 @@ int main() {
     Test::LichessDbPuzzle db;
 
     //db.open_and_build_index("../data/single_out.csv");
-    db.open_and_build_index("../data/athousand_sorted.csv");
-    //db.open_and_build_index("../data/single_out.csv");
+    //db.open_and_build_index("../data/athousand_sorted.csv");
+    db.open_and_build_index("../data/lichess_db_puzzle.csv");
 
     std::cout << "First Pass" << std::endl;
 
@@ -27,7 +27,10 @@ int main() {
     buffer.reserve(256);
     Chess::Position p;
 
-    db.pass_FEN_and_first_UCI([&p, &res, &buffer](const std::string_view FEN, const std::string_view UCI, const u64 index) {
+    int total = 0;
+
+    db.pass_FEN_and_first_UCI([&p, &res, &buffer, &total](const std::string_view FEN, const std::string_view UCI, const u64 index) {
+        total++;
         buffer.assign(FEN);
         p.set(buffer);
         buffer.assign(UCI);
@@ -56,7 +59,8 @@ int main() {
       Test::LichessPuzzle puzzle = db.get_full(position_id);
       std::cout << position_id << ":> " << puzzle.link << std::endl; });
 
-    std::cout << "Total found: " << i << " Done.\n";
+    int percent = abs(((float)i / total) * 100);
+    std::cout << "Total found: %" << percent << "[" << i << "/" << total << "] Done.\n";
 
     return 0;
 }
