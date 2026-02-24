@@ -1,3 +1,9 @@
+#include <iostream>
+#include <sstream>
+#include <string_view>
+
+
+
 #include "test.h"
 
 #ifdef __AVX2__
@@ -6,6 +12,16 @@
 
 namespace Test
 {
+
+    std::string_view get_first_word(std::string_view str)
+    {
+        size_t space_pos = str.find(' ');
+        if (space_pos == std::string_view::npos)
+        {
+            return str; // No space found, return entire string
+        }
+        return str.substr(0, space_pos);
+    }
 
     bool MemoryMappedFile::open(const std::string &path)
     {
@@ -262,6 +278,11 @@ namespace Test
         comma = find_comma_avx2(col_start, line_end - col_start);
         // Add column from col_start to comma
         result.FEN = std::string_view(col_start, comma - col_start);
+
+        col_start = comma + 1; // Skip comma
+        comma = find_comma_avx2(col_start, line_end - col_start);
+
+        result.first_UCI = get_first_word(std::string_view(col_start, comma - col_start));
         return result;
     }
 
@@ -367,7 +388,7 @@ namespace Test
         return 0;
     }
 
-    int LichessDbPuzzle::pass_FEN(std::function<void(std::string_view, size_t)> processor)
+    int LichessDbPuzzle::pass_FEN_and_first_UCI(std::function<void(std::string_view, std::string_view, size_t)> processor)
     {
 
         for (size_t row_id = 0; row_id < parser.row_count(); row_id++)
@@ -375,18 +396,48 @@ namespace Test
 
             ParsedRow row = parser.get_row(row_id);
 
-            processor(row.FEN, row_id);
+            processor(row.FEN, row.first_UCI, row_id);
         }
 
         return 0;
     }
 
-    std::string LichessDbPuzzle::get_full(size_t index)
+    LichessPuzzle LichessDbPuzzle::get_full(size_t index)
     {
 
         ParsedRow row = parser.get_row(index);
 
-        return std::string{row.full_line};
-    }
+        std::string_view input = row.full_line;
 
+        std::string s{input}; // Need copy for stringstream
+        std::istringstream iss(s);
+        std::string tags;
+
+        // Extract next three tokens
+        std::string id, FEN, moves;
+        std::getline(iss, id, ',');
+        std::getline(iss, FEN, ',');
+        std::getline(iss, moves, ',');
+
+        std::string rating1, rating2, rating3, rating4;
+        std::getline(iss, rating1, ',');
+        std::getline(iss, rating2, ',');
+        std::getline(iss, rating3, ',');
+        std::getline(iss, rating4, ',');
+        std::getline(iss, tags, ',');
+
+        std::string link = std::string{"https://lichess.org/training/"} + id;
+
+       
+        //link = link.substr(0, 28);
+
+
+        return LichessPuzzle
+        {
+            .FEN = FEN,
+            .moves = moves,
+            .id = id,
+            .link = link
+        };
+    }
 }

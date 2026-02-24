@@ -15,7 +15,8 @@ add_executable(main
    src/position.cpp
    src/test.cpp
    src/bitset.cpp
-   src/matcher.cpp)
+   src/matcher.cpp
+   src/moves.cpp)
 
    target_include_directories(main PRIVATE ${CMAKE_SOURCE_DIR}/external/csv2/csv2/include)
 

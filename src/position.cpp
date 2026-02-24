@@ -92,4 +92,14 @@ namespace Chess {
 
         return *this;
     }
+
+
+    void Position::make_move(Move move) {
+        Square from = move.from_sq();
+        Square to = move.to_sq();
+
+        move_piece(from, to);
+
+        _side_to_move = ~_side_to_move;
+    }
 }

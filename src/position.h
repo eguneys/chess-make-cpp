@@ -4,6 +4,7 @@
 
 #include "types.h"
 #include "bitboard.h"
+#include "moves.h"
 
 
 namespace Chess {
@@ -27,6 +28,8 @@ namespace Chess {
         void remove_piece(Square s);
 
         Color side_to_move() const;
+
+        void make_move(Move move);
 
         private:
         void move_piece(Square from, Square to);

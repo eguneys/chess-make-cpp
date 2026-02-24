@@ -68,6 +68,7 @@ namespace Test {
     {
         std::string_view full_line;
         std::string_view FEN;
+        std::string_view first_UCI;
         size_t line_number;
         size_t file_offset;
     };
@@ -93,6 +94,14 @@ namespace Test {
         bool is_open() const;
     };
 
+
+    struct LichessPuzzle {
+        std::string FEN;
+        std::string moves;
+        std::string id;
+        std::string link;
+    };
+
     class LichessDbPuzzle
     {
 
@@ -101,9 +110,9 @@ namespace Test {
 
     public:
         int open_and_build_index(std::string db_filename);
-        int pass_FEN(std::function<void(std::string_view, size_t)> processor);
+        int pass_FEN_and_first_UCI(std::function<void(std::string_view, std::string_view, size_t)> processor);
 
-        std::string get_full(size_t index);
+        LichessPuzzle get_full(size_t index);
     };
 
 }
