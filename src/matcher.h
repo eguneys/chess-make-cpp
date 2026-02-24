@@ -6,11 +6,12 @@
 #include "types.h"
 #include "position.h"
 #include "bitset.h"
+#include "bitboard_extra.h"
 
 namespace Chess {
 
 
-    struct KnightInstance {
+    struct PieceInstance {
         u64 position_id;
         Square square;
         Color color;
@@ -39,6 +40,7 @@ namespace Chess {
         KNIGHT_ON_OUTPOST,
 
         // ---------- Bishop-instance ----------
+        BISHOP_ONLY_DEFENDED_BY_KNIGHT,
         BISHOP_PINNED_TO_KING,
 
         FEATURE_COUNT
@@ -63,6 +65,12 @@ namespace Chess {
         {FeatureID::KNIGHT_ATTACKED_BY_PAWN,
          FeatureDomain::KnightInstance,
          "knight_attacked_by_pawn"},
+
+        {FeatureID::BISHOP_ONLY_DEFENDED_BY_KNIGHT,
+         FeatureDomain::BishopInstance,
+         "bishop_only_defended_by_knight"},
+
+
     };
 
     struct FeatureStorage
@@ -78,7 +86,8 @@ namespace Chess {
     };
 
     using PositionFeatureFn = bool (*)(const Position&);
-    using KnightFeatureFn = bool (*)(const Position&, const KnightInstance&);
+    using KnightFeatureFn = bool (*)(const Position&, const PieceInstance&);
+    using BishopFeatureFn = bool (*)(const Position&, const PieceInstance&);
 
     struct FeatureExtractor
     {
@@ -87,16 +96,35 @@ namespace Chess {
         void *fn;
     };
 
-    constexpr KnightFeatureFn knight_only_defended_by_bishop = [](const Position &p, const KnightInstance &k) {
-        return true;
-    };
-    constexpr KnightFeatureFn knight_attacked_by_pawn = [](const Position &p, const KnightInstance &k) {
+    constexpr KnightFeatureFn bishop_only_defended_by_knight = [](const Position &p, const PieceInstance &k) {
+        Bitboard defenders = attackers_to(p, k.square, k.color);
+
+        Square only = pop_lsb(defenders);
+
+        if (!defenders) {
+            return typeof_piece(p.piece_on(only)) == Knight;
+        }
+
         return false;
     };
 
 
 
+    constexpr KnightFeatureFn knight_only_defended_by_bishop = [](const Position &p, const PieceInstance &k) {
+        Bitboard defenders = attackers_to(p, k.square, k.color);
 
+        Square only = pop_lsb(defenders);
+
+        if (!defenders) {
+            return typeof_piece(p.piece_on(only)) == Bishop;
+        }
+
+        return false;
+    };
+
+    constexpr KnightFeatureFn knight_attacked_by_pawn = [](const Position &p, const PieceInstance &k) {
+        return false;
+    };
 
     constexpr FeatureExtractor EXTRACTORS[] = {
         {FeatureID::SIDE_TO_MOVE_WHITE,
@@ -110,8 +138,12 @@ namespace Chess {
          (void *)knight_only_defended_by_bishop},
         {FeatureID::KNIGHT_ATTACKED_BY_PAWN,
          FeatureDomain::KnightInstance,
-         (void *)knight_attacked_by_pawn}};
-    
+         (void *)knight_attacked_by_pawn},
+        {FeatureID::BISHOP_ONLY_DEFENDED_BY_KNIGHT,
+         FeatureDomain::BishopInstance,
+         (void *)bishop_only_defended_by_knight},
+    };
+
     class BitsetManager {
 
         public:
@@ -125,12 +157,17 @@ namespace Chess {
             private:
                 void process_position_features(const Position &p, uint64_t position_id);
                 void process_knight_features(const Position &p, u64 position_id, Square sq, Color c, size_t knight_index);
-                void allocate_features(size_t num_positions, size_t num_knights);
+                void process_bishop_features(const Position &p, u64 position_id, Square sq, Color c, size_t bishop_index);
+                void allocate_features();
                 FeatureStorage features;
 
                 u64 nb_positions;
                 u64 nb_knights;
                 u64 current_knight_index;
-                std::vector<KnightInstance> knights;
+                std::vector<PieceInstance> knights;
+
+                u64 nb_bishops;
+                u64 current_bishop_index;
+                std::vector<PieceInstance> bishops;
             };
 }

@@ -14,7 +14,9 @@ int main() {
     Chess::BitsetManager res;
     Test::LichessDbPuzzle db;
 
-    db.open_and_build_index();
+    //db.open_and_build_index("../data/single_out.csv");
+    db.open_and_build_index("../data/athousand_sorted.csv");
+    //db.open_and_build_index("../data/single_out.csv");
 
     std::cout << "First Pass" << std::endl;
 
@@ -39,10 +41,16 @@ int main() {
         res.process_position_second_pass(p, index);
     });
 
-    res.full_query([&db](u64 position_id)
-                   { std::cout << db.get_full(position_id) << std::endl; });
+    int i = 0;
+    res.full_query([&i, &db](u64 position_id)
+                   { 
+        i++;
+        if (i > 8) {
+            return;
+        }
+                    std::cout << position_id << " > " << db.get_full(position_id) << std::endl; });
 
-    std::cout << " Done.\n";
+    std::cout << "Total found: " << i << " Done.\n";
 
     return 0;
 }

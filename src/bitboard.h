@@ -183,6 +183,7 @@ namespace Chess {
         }
     }
 
+
     inline int popcount(Bitboard b) {
         return int(_mm_popcnt_u64(b));
     }

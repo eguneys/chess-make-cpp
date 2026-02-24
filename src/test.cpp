@@ -352,12 +352,12 @@ namespace Test
         return mmap.valid();
     }
 
-    int LichessDbPuzzle::open_and_build_index()
+    int LichessDbPuzzle::open_and_build_index(std::string db_filename)
     {
         std::cout << "Ultra-Fast CSV Parser for Windows (AVX2)" << std::endl;
         std::cout << "========================================" << std::endl;
 
-        if (!parser.open("../data/lichess_db_puzzle.csv"))
+        if (!parser.open(db_filename))
         {
             std::cerr << "Failed to open file" << std::endl;
             return 1;

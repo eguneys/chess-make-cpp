@@ -100,7 +100,7 @@ namespace Test {
         UltraFastCSVParser parser;
 
     public:
-        int open_and_build_index();
+        int open_and_build_index(std::string db_filename);
         int pass_FEN(std::function<void(std::string_view, size_t)> processor);
 
         std::string get_full(size_t index);
