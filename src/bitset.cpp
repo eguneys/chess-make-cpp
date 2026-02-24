@@ -26,7 +26,7 @@ namespace Chess {
             dst[i] = a[i] & b[i];
     }
 
-    inline Bitset operator&(const Bitset &a, const Bitset &b)
+    Bitset operator&(const Bitset &a, const Bitset &b)
     {
         Bitset out;
         out.w.resize(a.w.size());
@@ -36,6 +36,8 @@ namespace Chess {
             a.w.data(),
             b.w.data(),
             a.w.size());
+
+        out.nbits = a.nbits;
 
         return out;
     }
@@ -47,7 +49,7 @@ namespace Chess {
     result &= knight_attacked_by_pawn;
     result &= side_to_move_white;
     */
-    inline Bitset& operator&=(Bitset& a, const Bitset& b) {
+    Bitset& operator&=(Bitset& a, const Bitset& b) {
     bitset_and_avx2(
         a.w.data(),
         a.w.data(),

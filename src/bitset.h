@@ -35,14 +35,14 @@ public:
         std::fill(w.begin(), w.end(), 0ULL);
     }
 
-    friend inline Bitset operator&(const Bitset &a, const Bitset &b);
-    friend inline Bitset& operator&=(Bitset& a, const Bitset& b);
+    friend Bitset operator&(const Bitset &a, const Bitset &b);
+    friend Bitset& operator&=(Bitset& a, const Bitset& b);
 
     private:
     size_t nbits = 0;
     std::vector<uint64_t> w;
 };
 
-inline Bitset operator&(const Bitset &a, const Bitset &b);
-inline Bitset &operator&=(Bitset &a, const Bitset &b);
+Bitset operator&(const Bitset &a, const Bitset &b);
+Bitset &operator&=(Bitset &a, const Bitset &b);
 }

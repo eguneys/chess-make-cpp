@@ -364,6 +364,7 @@ namespace Test
         }
 
         parser.build_index();
+        return 0;
     }
 
     int LichessDbPuzzle::pass_FEN(std::function<void(std::string_view, size_t)> processor)

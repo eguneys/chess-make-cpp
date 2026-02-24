@@ -14,8 +14,8 @@ add_executable(main
    src/bitboard.cpp
    src/position.cpp
    src/test.cpp
-   src/matcher.cpp
-   src/bitset.cpp)
+   src/bitset.cpp
+   src/matcher.cpp)
 
    target_include_directories(main PRIVATE ${CMAKE_SOURCE_DIR}/external/csv2/csv2/include)
 
