@@ -4,28 +4,33 @@
 #include "bitboard.h"
 #include "position.h"
 #include "test.h"
+#include "matcher.h"
 
 int main() {
     std::cout << "Hello" << std::endl;
 
     Chess::Bitboards::init();
 
-    //Chess::Position p;
-    //p.set("rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
-    //Chess::Piece pp = p.piece_on(Chess::E8);
-    //std::cout << pp;
-    //std::cout << Chess::Bitboards::pretty(p.pieces(Chess::Bishop));
+    Chess::BitsetManager res;
 
+    Test::LichessDbPuzzle db;
 
-    Chess::Position p;
+    db.open_and_build_index();
 
-    Test::test([](std::string_view value) {
+    std::cout << "First Pass" << std::endl;
 
-        std::string SS = std::string{value};
-
+    db.pass_FEN([](const std::string_view FEN, const u64 index) {
     });
 
-    std::cout << "done\n";
+    std::cout << "Second Pass" << std::endl;
+    db.pass_FEN([](const std::string_view FEN, const u64 index) {
+    });
+
+    std::cout << db.get_full(0) << std::endl;
+    std::cout << db.get_full(10) << std::endl;
+    std::cout << db.get_full(11) << std::endl;
+
+    std::cout << " Done.\n";
 
     return 0;
 }
