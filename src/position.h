@@ -22,6 +22,7 @@ namespace Chess {
         Bitboard pieces(PieceType pt = All_Pieces) const;
         Bitboard pieces(Color c) const;
         Piece piece_on(Square s) const;
+        Color color_on(Square s) const;
         bool empty(Square s) const;
 
         void put_piece(Piece pc, Square s);
@@ -45,6 +46,10 @@ namespace Chess {
     inline Piece Position::piece_on(Square s) const {
         assert(is_ok(s));
         return _pieces[s];
+    }
+
+    inline Color Position::color_on(Square s) const {
+        return color_of(piece_on(s));
     }
 
     inline bool Position::empty(Square s) const { return piece_on(s) == No_Piece; }
