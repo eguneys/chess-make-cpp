@@ -100,6 +100,7 @@ namespace Test {
         std::string moves;
         std::string id;
         std::string link;
+        std::string full;
     };
 
     class LichessDbPuzzle

@@ -27,6 +27,7 @@ namespace Chess {
 
         void put_piece(Piece pc, Square s);
         void remove_piece(Square s);
+        void swap_piece(Square s, Piece pc);
 
         Color side_to_move() const;
 
@@ -76,11 +77,17 @@ namespace Chess {
     inline void Position::move_piece(Square from, Square to) {
         Piece pc = _pieces[from];
         Bitboard fromTo = from | to;
+
         by_Type_BB[All_Pieces] ^= fromTo;
         by_Type_BB[typeof_piece(pc)] ^= fromTo;
         by_Color_BB[color_of(pc)] ^= fromTo;
         _pieces[from] = No_Piece;
         _pieces[to] = pc;
+    }
+
+    inline void Position::swap_piece(Square s, Piece pc) {
+        remove_piece(s);
+        put_piece(pc, s);
     }
 
 }

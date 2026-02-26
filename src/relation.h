@@ -1,5 +1,6 @@
 #pragma once
 
+#include <iostream>
 #include "types.h"
 #include "bitset.h"
 
@@ -128,4 +129,44 @@ namespace Chess {
         }
     };
 
+
+
+
+    template <typename T, typename U>
+    Bitset project_left(
+        const Relation<T, U> &rel,
+        const Bitset &right_filter,
+        u64 num_u)
+    {
+        Bitset result(num_u);
+
+        for (const auto &e : rel.data())
+        {
+            if (right_filter.test(e.l))
+            {
+                result.set(e.r);
+            }
+        }
+        return result;
+    }
+
+
+
+    template <typename T, typename U>
+    Bitset project_right(
+        const Relation<T, U> &rel,
+        const Bitset &left_filter,
+        u64 num_u)
+    {
+        Bitset result(num_u);
+
+        for (const auto &e : rel.data())
+        {
+            if (left_filter.test(e.r))
+            {
+                result.set(e.l);
+            }
+        }
+        return result;
+    }
 }

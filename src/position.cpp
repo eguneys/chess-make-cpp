@@ -98,7 +98,18 @@ namespace Chess {
         Square from = move.from_sq();
         Square to = move.to_sq();
 
-        move_piece(from, to);
+        bool captured = !empty(to);
+
+        if (captured)
+        {
+            Piece pc = piece_on(from);
+            remove_piece(from);
+            swap_piece(to, pc);
+        }
+        else
+        {
+            move_piece(from, to);
+        }
 
         _side_to_move = ~_side_to_move;
     }

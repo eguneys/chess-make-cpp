@@ -437,7 +437,8 @@ namespace Test
             .FEN = FEN,
             .moves = moves,
             .id = id,
-            .link = link
+            .link = link,
+            .full = std::string{input}
         };
     }
 }

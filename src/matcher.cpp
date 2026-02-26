@@ -1,29 +1,40 @@
-#include "types.h"
-#include "matcher.h"
 #include <iostream>
 #include <array>
+
+#include "types.h"
+#include "matcher.h"
+
 
 namespace Chess
 {
 
     void BitsetManager::full_query(std::function<void(u64)> materialize) {
-        Bitset candidate_bishops =
-            features.bishop_features[FeatureID::BISHOP_ONLY_DEFENDED_BY_KNIGHT] &
-            features.bishop_features[FeatureID::BISHOP_ATTACKS_QUEEN];
 
-        Bitset positions(nb_positions);
+        Bitset knight_can_be_captured_with_check = features.knight_features[FeatureID::KNIGHT_CAN_BE_CAPTURED_WITH_CHECK];
 
-        for (size_t k = 0; k < candidate_bishops.size(); ++k) {
-            if (candidate_bishops.test(k)) {
+        Bitset bishops_only_defended_by_knight = features.bishop_features[FeatureID::BISHOP_ONLY_DEFENDED_BY_KNIGHT] &
+                                                 features.bishop_features[FeatureID::BISHOP_ATTACKS_QUEEN];
+
+        Bitset bishops_defended_by_those_knights = project_left(
+            relations.knight_defends_bishop,
+            knight_can_be_captured_with_check,
+            nb_pieces
+        );
+
+        Bitset good_bishops = bishops_only_defended_by_knight & bishops_defended_by_those_knights;
+
+        Bitset positions(nb_pieces);
+        for (size_t k = 0; k < nb_pieces; ++k) {
+            if (good_bishops.test(k)) {
                 assert(pieces[k].type == Bishop);
                 positions.set(pieces[k].position_id);
             }
         }
 
-        Bitset final_positions = positions & features.position_features[FeatureID::SIDE_TO_MOVE_WHITE];
+        Bitset final_positions = positions;// & features.position_features[FeatureID::SIDE_TO_MOVE_WHITE];
 
 
-        for (size_t k = 0; k < nb_positions; k++) {
+        for (size_t k = 0; k < nb_pieces; k++) {
             if (final_positions.test(k)) {
                 materialize(k);
             }
@@ -100,7 +111,7 @@ namespace Chess
                 break;
             case FeatureDomain::KnightInstance:
                 features.knight_features[info.id] = Bitset(nb_pieces);
-
+                break;
             case FeatureDomain::BishopInstance:
                 features.bishop_features[info.id] = Bitset(nb_pieces);
                 break;
@@ -129,49 +140,12 @@ namespace Chess
 
         process_position_features(p, position_id);
 
-        Color opponent  = ~p.side_to_move();
 
-        Bitboard kk = p.pieces(Knight) & p.pieces(opponent);
-
-        while (kk) {
-            Square sq = pop_lsb(kk);
-
-            u64 piece_index = current_piece_index++;
-
-            pieces.push_back({
-                position_id,
-                sq,
-                opponent,
-                Knight
-            });
-
-            process_knight_features(p, position_id, sq, opponent, piece_index);
-        }
-
-
-        Bitboard bb = p.pieces(Bishop) & p.pieces(opponent);
-
-        while (bb) {
-            Square sq = pop_lsb(bb);
-
-            u64 piece_index = current_piece_index++;
-
-            pieces.push_back({
-                position_id,
-                sq,
-                opponent,
-                Bishop
-            });
-
-            process_bishop_features(p, position_id, sq, opponent, piece_index);
-        }
-
-
-
-        std::array<int64_t, 64> square_to_piece;
+        std::array<i64, 64> square_to_piece;
         square_to_piece.fill(-1LL);
 
         Bitboard occ = p.pieces();
+
 
         while (occ) {
             Square sq = pop_lsb(occ);
@@ -191,11 +165,28 @@ namespace Chess
             square_to_piece[sq] = piece_id;
         }
 
+
+        occ = p.pieces();
+
+        while (occ) {
+            Square sq = pop_lsb(occ);
+            u64 pid  = square_to_piece[sq];
+            assert(pid != -1);
+
+            const auto& inst = pieces[pid];
+
+            if (inst.type == Knight) {
+                process_knight_features(p, position_id, sq, inst.color, pid);
+            } else if (inst.type == Bishop) {
+                process_bishop_features(p, position_id, sq, inst.color, pid);
+            }
+        }
+
         populate_relations_for_position(p, square_to_piece);
     }
 
     void BitsetManager::populate_relations_for_position(const Position &p,
-                                                        std::array<int64_t, 64> &square_to_piece)
+                                                        std::array<i64, 64> &square_to_piece)
     {
         Bitboard bishops = p.pieces(Bishop);
 
@@ -204,7 +195,7 @@ namespace Chess
             Square b_sq = pop_lsb(bishops);
             Color c = p.color_on(b_sq);
 
-            u64 bishop_id = square_to_piece[b_sq];
+            i64 bishop_id = square_to_piece[b_sq];
             assert(bishop_id != -1);
             assert(pieces[bishop_id].type == Bishop);
 
@@ -219,6 +210,8 @@ namespace Chess
                 u64 knight_id = square_to_piece[k_sq];
                 assert(knight_id != -1);
                 assert(pieces[knight_id].type == Knight);
+                assert(knight_id < nb_pieces);
+                assert(bishop_id < nb_pieces);
 
                 relations.knight_defends_bishop.add(knight_id, bishop_id);
             }

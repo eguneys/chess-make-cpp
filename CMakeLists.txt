@@ -16,8 +16,10 @@ add_executable(main
    src/test.cpp
    src/bitset.cpp
    src/matcher.cpp
-   src/moves.cpp)
-
-   target_include_directories(main PRIVATE ${CMAKE_SOURCE_DIR}/external/csv2/csv2/include)
+   src/moves.cpp
+   src/relation.cpp
+   
+   src/file_io.cpp
+   )
 
 target_compile_options(main PRIVATE /arch:AVX2)

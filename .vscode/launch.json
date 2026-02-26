@@ -1,33 +1,29 @@
 {
-    // Olası öznitelikler hakkında bilgi edinmek için IntelliSense kullanın.
-    // Mevcut özniteliklerin açıklamalarını görüntülemek için üzerine gelin.
-    // Daha fazla bilgi için şu adresi ziyaret edin: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [
-    {
-        "name": "(gdb) Başlat",
-        "type": "cppdbg",
-        "request": "launch",
-        "program": "${workspaceFolder}/build/main.exe",
-        "args": [],
-        "stopAtEntry": false,
-        "cwd": "${fileDirname}",
-        "environment": [],
-        "externalConsole": false,
-        "MIMode": "gdb",
-        "miDebuggerPath": "gdb",
-        "setupCommands": [
-            {
-                "description": "gdb için düzgün yazdırmayı etkinleştir",
-                "text": "-enable-pretty-printing",
-                "ignoreFailures": true
-            },
-            {
-                "description": "Ayrıştırılmış Kod Varyantını Intel olarak ayarla",
-                "text": "-gdb-set disassembly-flavor intel",
-                "ignoreFailures": true
-            }
-        ]
-    }
+        {
+            "name": "Debug Launch (CMake Tools)",
+            "type": "cppdbg", // Use "cppdbg" for Windows, or "lldb" for macOS/Linux with LLDB
+            "request": "launch",
+            "program": "${command:cmake.launchTargetPath}",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [
+                {
+                    "name": "PATH",
+                    "value": "${command:cmake.launchTargetDirectory}"
+                }
+            ],
+            "externalConsole": false,
+            "MIMode": "gdb", // Use "gdb" for Linux/MinGW, "lldb" for macOS
+            "setupCommands": [
+                {
+                    "description": "Enable pretty-printing for gdb",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ]
+        }
     ]
 }

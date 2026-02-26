@@ -1,0 +1,7 @@
+Big picture is nice, but let's not overlook the early prototype we are in and what we are missing.
+
+The output is a bunch of positions, the categories are ideas that can only be materialized by manual analysis through the output. And even then the first category of missing positions cannot be extracted in any way what so ever (unless we have validative and test datasets that workout this category under the game conditions like a tutorial).
+
+My envision is that user eventually either writes these rules or combines them in some sort of UI and a DSL. That later is compiled and checked against the big database, and visualized back to the user where user can analyse refine and form some sort of feedback loop thus hopefully satisfying the game criteria I mentioned.
+
+This moment we are still very early of this vision, we can only do simple joins over relations and filtering through Bitsets. And we need a good next direction we can follow to build on.

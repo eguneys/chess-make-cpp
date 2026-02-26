@@ -27,6 +27,9 @@ namespace Chess {
         MATERIAL_IMBALANCE,
 
         // ---------- Knight-instance ----------
+        KNIGHT_OCCUPIES,
+        KNIGHT_CAN_BE_CAPTURED_WITH_CHECK,
+        KNIGHT_TAKES_KNIGHT_WITH_CHECK,
         KNIGHT_ONLY_DEFENDED_BY_BISHOP,
         KNIGHT_ATTACKED_BY_PAWN,
         KNIGHT_ON_OUTPOST,
@@ -50,6 +53,19 @@ namespace Chess {
         {FeatureID::SIDE_TO_MOVE_WHITE,
          FeatureDomain::Position,
          "side_to_move_white"},
+
+        {FeatureID::KNIGHT_OCCUPIES,
+         FeatureDomain::KnightInstance,
+         "knight_occupies"},
+
+        {FeatureID::KNIGHT_CAN_BE_CAPTURED_WITH_CHECK,
+         FeatureDomain::KnightInstance,
+         "knight_can_be_captured_with_check"},
+
+        {FeatureID::KNIGHT_TAKES_KNIGHT_WITH_CHECK,
+         FeatureDomain::KnightInstance,
+         "knight_takes_knight_with_check"},
+
 
         {FeatureID::KNIGHT_ONLY_DEFENDED_BY_BISHOP,
          FeatureDomain::KnightInstance,
@@ -120,6 +136,10 @@ namespace Chess {
         return false;
     };
 
+    constexpr KnightFeatureFn knight_occupies = [](const Position &p, const PieceInstance &k) {
+        return true;
+    };
+
 
 
     constexpr KnightFeatureFn knight_only_defended_by_bishop = [](const Position &p, const PieceInstance &k) {
@@ -138,6 +158,37 @@ namespace Chess {
         return false;
     };
 
+    constexpr KnightFeatureFn knight_takes_knight_with_check = [](const Position &p, const PieceInstance &k) {
+        Bitboard takes_knight = attacks_bb(Knight, k.square, p.pieces()) & p.pieces(Knight) & p.pieces(~k.color);
+
+        while (takes_knight) {
+            Square sq = pop_lsb(takes_knight);
+
+            Bitboard with_check = attacks_bb(Knight, sq, p.pieces()) & p.pieces(~k.color) & p.pieces(King);
+
+            return with_check != 0;
+        }
+
+        return false;
+    };
+
+    constexpr KnightFeatureFn knight_can_be_captured_with_check = [](const Position &p, const PieceInstance &k) {
+        Bitboard takes_knight = attackers_to(p, k.square, ~k.color);
+
+        while (takes_knight) {
+            Square sq = pop_lsb(takes_knight);
+            PieceType pc = typeof_piece(p.piece_on(sq));
+
+            Bitboard with_check = (pc == Pawn ? pawn_attacks_bb(~k.color, sq) : attacks_bb(pc, k.square, p.pieces())) & p.pieces(k.color) & p.pieces(King);
+
+            return with_check != 0;
+        }
+
+        return false;
+    };
+
+
+
     constexpr FeatureExtractor EXTRACTORS[] = {
         {FeatureID::SIDE_TO_MOVE_WHITE,
          FeatureDomain::Position,
@@ -145,9 +196,19 @@ namespace Chess {
          {
              return p.side_to_move() == White;
          }},
+
         {FeatureID::KNIGHT_ONLY_DEFENDED_BY_BISHOP,
          FeatureDomain::KnightInstance,
          (void *)knight_only_defended_by_bishop},
+        {FeatureID::KNIGHT_OCCUPIES,
+         FeatureDomain::KnightInstance,
+         (void *)knight_occupies},
+        {FeatureID::KNIGHT_CAN_BE_CAPTURED_WITH_CHECK,
+         FeatureDomain::KnightInstance,
+         (void *)knight_can_be_captured_with_check},
+        {FeatureID::KNIGHT_TAKES_KNIGHT_WITH_CHECK,
+         FeatureDomain::KnightInstance,
+         (void *)knight_takes_knight_with_check},
         {FeatureID::KNIGHT_ATTACKED_BY_PAWN,
          FeatureDomain::KnightInstance,
          (void *)knight_attacked_by_pawn},

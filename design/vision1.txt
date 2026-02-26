@@ -1,0 +1,18 @@
+Now I can use relations and bitsets correctly. Yet I want to talk about something else. Let's think about this definition for a second:
+
+bishop only_defense knight
+bishop attacks queen
+knight takes knight with check
+queen recaptures
+queen takes hanging bishop
+
+
+This encodes a witness line into a tactic. I came to a point where I can almost express this using relations and match against the big database. Up to first three lines at least, without the following move sequences with queen recaptures and queen takes hanging bishop.
+
+The results correctly match against the puzzles that actually corresponds to this tactic correctly, but also some false positives slip in because of lack of precision. 
+
+Before I iron things out, like lack of any sort of legality check and all, I want to think about the bigger picture on what I am doing exactly.
+
+I am matching witness lines on a big database, and filtering those that match. And there are 3 categories: A. I don't have any idea those who are supposed to match but don't, those missing elements. B. The false positive matches that slip in, C. Correct matches. 
+
+The practical usefulness and applications of visualizing these categories, (although 1 is a problem that should be solved.), and turning into a game. That's what I envision, and the discussion that arise from this will affect what I should focus on next.
