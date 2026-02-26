@@ -51,8 +51,8 @@ int main() {
 
     //db.open_and_build_index("../data/single_out.csv");
     //db.open_and_build_index("../data/athousand_sorted.csv");
-    //db.open_and_build_index("../data/lichess_db_puzzle.csv");
-    db.open_and_build_index("../data/test.log");
+    db.open_and_build_index("../data/lichess_db_puzzle.csv");
+    //db.open_and_build_index("../data/test.log");
 
     std::cout << "First Pass" << std::endl;
 
@@ -88,6 +88,7 @@ int main() {
 
     //Util::FileAppender logger("../data/test.log", true);
     Util::FileAppender logger("../data/test2.log", true);
+    logger.clear();
 
     int yes = 0;
     int no = 0;
@@ -97,7 +98,7 @@ int main() {
                        Test::LichessPuzzle puzzle = db.get_full(position_id);
                        logger.writeLine(puzzle.full);
 
-                       int result = adhoc_validate_puzzle_solution(puzzle);
+                       int result = 0;//adhoc_validate_puzzle_solution(puzzle);
 
                        if (result == 0)
                        {

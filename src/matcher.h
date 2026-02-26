@@ -39,6 +39,10 @@ namespace Chess {
         BISHOP_ATTACKS_QUEEN,
         BISHOP_PINNED_TO_KING,
 
+        // ---- Queen ----
+        QUEEN_ONLY_DEFENDED_BY_ROOK,
+
+
         FEATURE_COUNT
     };
 
@@ -82,6 +86,9 @@ namespace Chess {
          FeatureDomain::BishopInstance,
          "bishop_attacks_queen"},
 
+        {FeatureID::QUEEN_ONLY_DEFENDED_BY_ROOK,
+         FeatureDomain::QueenInstance,
+         "bishop_only_defended_by_knight"},
 
 
     };
@@ -96,11 +103,11 @@ namespace Chess {
 
         // Extendable
         std::unordered_map<FeatureID, Bitset> bishop_features;
+        std::unordered_map<FeatureID, Bitset> queen_features;
     };
 
     using PositionFeatureFn = bool (*)(const Position&);
-    using KnightFeatureFn = bool (*)(const Position&, const PieceInstance&);
-    using BishopFeatureFn = bool (*)(const Position&, const PieceInstance&);
+    using PieceFeatureFn = bool (*)(const Position&, const PieceInstance&);
 
     struct FeatureExtractor
     {
@@ -109,7 +116,7 @@ namespace Chess {
         void *fn;
     };
 
-    constexpr BishopFeatureFn bishop_attacks_queen = [](const Position &p, const PieceInstance &k)
+    constexpr PieceFeatureFn bishop_attacks_queen = [](const Position &p, const PieceInstance &k)
     {
         Bitboard attacks = bishop_attacks(k.square, p.pieces());
 
@@ -124,8 +131,12 @@ namespace Chess {
         return false;
     };
 
-    constexpr BishopFeatureFn bishop_only_defended_by_knight = [](const Position &p, const PieceInstance &k) {
+    constexpr PieceFeatureFn bishop_only_defended_by_knight = [](const Position &p, const PieceInstance &k) {
         Bitboard defenders = attackers_to(p, k.square, k.color);
+
+        if (!defenders) {
+            return false;
+        }
 
         Square only = pop_lsb(defenders);
 
@@ -136,13 +147,31 @@ namespace Chess {
         return false;
     };
 
-    constexpr KnightFeatureFn knight_occupies = [](const Position &p, const PieceInstance &k) {
+    constexpr PieceFeatureFn queen_only_defended_by_rook = [](const Position &p, const PieceInstance &k) {
+        Bitboard defenders = attackers_to(p, k.square, k.color);
+
+        if (!defenders) {
+            return false;
+        }
+
+        Square only = pop_lsb(defenders);
+
+        if (!defenders) {
+            return typeof_piece(p.piece_on(only)) == Rook;
+        }
+
+        return false;
+    };
+
+
+
+    constexpr PieceFeatureFn knight_occupies = [](const Position &p, const PieceInstance &k) {
         return true;
     };
 
 
 
-    constexpr KnightFeatureFn knight_only_defended_by_bishop = [](const Position &p, const PieceInstance &k) {
+    constexpr PieceFeatureFn knight_only_defended_by_bishop = [](const Position &p, const PieceInstance &k) {
         Bitboard defenders = attackers_to(p, k.square, k.color);
 
         Square only = pop_lsb(defenders);
@@ -154,11 +183,11 @@ namespace Chess {
         return false;
     };
 
-    constexpr KnightFeatureFn knight_attacked_by_pawn = [](const Position &p, const PieceInstance &k) {
+    constexpr PieceFeatureFn knight_attacked_by_pawn = [](const Position &p, const PieceInstance &k) {
         return false;
     };
 
-    constexpr KnightFeatureFn knight_takes_knight_with_check = [](const Position &p, const PieceInstance &k) {
+    constexpr PieceFeatureFn knight_takes_knight_with_check = [](const Position &p, const PieceInstance &k) {
         Bitboard takes_knight = attacks_bb(Knight, k.square, p.pieces()) & p.pieces(Knight) & p.pieces(~k.color);
 
         while (takes_knight) {
@@ -172,7 +201,7 @@ namespace Chess {
         return false;
     };
 
-    constexpr KnightFeatureFn knight_can_be_captured_with_check = [](const Position &p, const PieceInstance &k) {
+    constexpr PieceFeatureFn knight_can_be_captured_with_check = [](const Position &p, const PieceInstance &k) {
         Bitboard takes_knight = attackers_to(p, k.square, ~k.color);
 
         while (takes_knight) {
@@ -218,6 +247,9 @@ namespace Chess {
         {FeatureID::BISHOP_ATTACKS_QUEEN,
          FeatureDomain::BishopInstance,
          (void *)bishop_attacks_queen},
+        {FeatureID::QUEEN_ONLY_DEFENDED_BY_ROOK,
+         FeatureDomain::QueenInstance,
+         (void *)queen_only_defended_by_rook},
     };
 
     class BitsetManager {
@@ -237,6 +269,7 @@ namespace Chess {
                 void process_position_features(const Position &p, uint64_t position_id);
                 void process_knight_features(const Position &p, u64 position_id, Square sq, Color c, size_t knight_index);
                 void process_bishop_features(const Position &p, u64 position_id, Square sq, Color c, size_t bishop_index);
+                void process_queen_features(const Position &p, u64 position_id, Square sq, Color c, size_t queen_index);
                 void allocate_features();
                 FeatureStorage features;
                 RelationStorage relations;

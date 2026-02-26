@@ -11,7 +11,8 @@ namespace Chess {
         Position,       // indexed by position_id
         KnightInstance, // indexed by knight_instance_id
         BishopInstance,
-        RookInstance
+        RookInstance,
+        QueenInstance
     };
 
 
@@ -20,6 +21,7 @@ namespace Chess {
     struct KnightTag {};
     struct BishopTag {};
     struct RookTag {};
+    struct QueenTag {};
     struct MoveTag {};
 
 
@@ -112,6 +114,7 @@ namespace Chess {
 
     struct RelationStorage {
         Relation<KnightTag, BishopTag> knight_defends_bishop;
+        Relation<QueenTag, QueenTag> queen_attacks_queen;
     };
 
 

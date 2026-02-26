@@ -55,6 +55,9 @@ namespace Util {
 
         void open();
         void close();
+
+        // Clear the file contents (truncate to 0)
+        void clear();
         // Write methods with return values
         size_t write(const std::string &data);
         size_t writeLine(const std::string &data);

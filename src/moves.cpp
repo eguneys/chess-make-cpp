@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "moves.h"
 
 namespace Chess {

@@ -68,6 +68,32 @@ namespace Util
         }
     }
 
+    void FileAppender::clear()
+    {
+        if (!_isOpen)
+            return;
+
+        // Close the file
+        close();
+
+        // Reopen with truncation flag
+        hFile = CreateFileA(
+            filename.c_str(),
+            FILE_APPEND_DATA,
+            FILE_SHARE_READ,
+            nullptr,
+            CREATE_ALWAYS, // Always create new file (truncates existing)
+            FILE_ATTRIBUTE_NORMAL,
+            nullptr);
+
+        if (hFile == INVALID_HANDLE_VALUE)
+        {
+            throwLastError("clear");
+        }
+
+        _isOpen = true;
+    }
+
     // Write methods with return values
     size_t FileAppender::write(const std::string &data)
     {
